@@ -34,9 +34,9 @@ implementation {
 
     components NeighC;
     Node.Neigh -> NeighC;
+    Node.neighborDisc -> neighborDisc;
 
     components CommandHandlerC;
     Node.CommandHandler -> CommandHandlerC;
-    Node.neighborDisc -> neighborDisc;
 
 }

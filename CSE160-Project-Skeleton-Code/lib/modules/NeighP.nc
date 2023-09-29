@@ -32,10 +32,10 @@ implementation{
     void printNeigh(){
         printf("My(%d) current neighbors: [", TOS_NODE_ID);
         for(i = 0; i < 20; i++){
-            if(NeighborList[i] != 255)
+            if(NeighborList[i] != 255 && NeighborList[i] != 0)
             printf("%d, ", i);
         }
-            printf("]\n");
+        printf("]\n");
     }
 
     command void Neigh.receiveNeighAck(uint16_t ttl, uint16_t src){
@@ -55,14 +55,13 @@ implementation{
             makePack(&sendAck, TOS_NODE_ID, src, ttl2, PROTOCOL_NEIGHBOR_ACK, TOS_NODE_ID, NeighborList, packet);
             call SimpleSend.send(sendAck, src);
         }
-
-        // msg->TLL--;
     }
 
     command void Neigh.discNeigh(){
         if(ttl != 0){
             ttl--;
-            makePack(&sendReq, TOS_NODE_ID, AM_BROADCAST_ADDR, ttl, PROTOCOL_NEIGHBOR_REQ, sequenceNum, NeighborList, packet); call SimpleSend.send(sendReq, AM_BROADCAST_ADDR);
+            makePack(&sendReq, TOS_NODE_ID, AM_BROADCAST_ADDR, ttl, PROTOCOL_NEIGHBOR_REQ, sequenceNum, NeighborList, packet); 
+            call SimpleSend.send(sendReq, AM_BROADCAST_ADDR);
             sequenceNum++;
         }
     }
