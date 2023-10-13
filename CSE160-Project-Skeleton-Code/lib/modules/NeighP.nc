@@ -38,6 +38,14 @@ implementation{
         printf("]\n");
     }
 
+    command void Neigh.print(){
+        printNeigh();
+    }
+
+    command uint8_t* Neigh.get(){
+        return NeighborList;
+    }
+
     command void Neigh.receiveNeighAck(uint16_t ttl, uint16_t src){
         if(NeighborList[src] == 255){
             NeighborList[src] = 1;

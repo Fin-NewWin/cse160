@@ -4,52 +4,66 @@ module FloodP{
     provides interface Flood;
     uses interface SimpleSend;
     uses interface Timer<TMilli> as sendTimer;
+    uses interface Neigh;
 }
 implementation{
-    uint8_t storedSeq[20] = {
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    };
     uint8_t i;
-    uint8_t j = 0;
-    pack* floodPack;
-    command void Flood.start(pack* msg) {
-        floodPack = msg;
+    uint8_t j;
+    uint8_t packet = "";
+
+    uint16_t ttl = MAX_TTL;
+    uint16_t sequenceNum = 0;
+    uint8_t* list;
+
+    pack floodPack;
+
+    bool done = FALSE;
+
+    uint8_t bestSeq[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+
+
+    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint8_t* payload, uint8_t length){
+        Package->src = src;
+        Package->dest = dest;
+        Package->TTL = TTL;
+        Package->seq = seq;
+        Package->protocol = protocol;
+        memcpy(Package->payload, &payload, length);
+    }
+
+
+    command void Flood.receiveFlood(pack* msg){
+        if(msg->src != TOS_NODE_ID && msg->TTL !=  0){
+            if(msg->seq < bestSeq[msg->src]){
+                bestSeq[msg->src] = msg->seq;
+                printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
+            }
+            msg->TTL--;
+            msg->seq++;
+            for(i = 0; i < 20; i++){
+                if (list[i] != 255) {
+                    call SimpleSend.send(*msg, i);
+                }
+            }
+        }
+    }
+
+    command void Flood.start(){
+        // printf("This shit from flood\n");
+        // call Neigh.print();
         call sendTimer.startPeriodic(5000);
     }
+
     event void sendTimer.fired(){
-        floodPack->TTL = floodPack->TTL - 1;
-        floodPack->src = TOS_NODE_ID;
-        for(i = 0; i < 20; i++) {
-            if (floodPack->seq == storedSeq[i]){
-                return;
+        if(!done){
+            list = call Neigh.get();
+            for(i = 0; i < 20; i++){
+                if (list[i] != 255) {
+                    makePack(&floodPack, TOS_NODE_ID, i, ttl, PROTOCOL_FLOOD, sequenceNum, list, packet); 
+                    call SimpleSend.send(floodPack, i);
+                }
             }
-        }
-        if(floodPack->dest != TOS_NODE_ID){
-            if (j == 20){
-                j = 0;
-            }
-            storedSeq[j] = floodPack->seq;
-            j++;
-            call SimpleSend.send(*floodPack, AM_BROADCAST_ADDR);
         }
     }
+
 }

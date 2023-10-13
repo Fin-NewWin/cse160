@@ -20,9 +20,9 @@ module Node{
     uses interface Receive;
 
     uses interface SimpleSend as Sender;
-    uses interface Flood;
 
     uses interface Neigh;
+    uses interface Flood;
 
     uses interface CommandHandler;
 
@@ -71,6 +71,11 @@ implementation{
                 call Neigh.receiveNeighAck(myMsg->TTL, myMsg->src);
             }
 
+            if(myMsg->protocol == PROTOCOL_FLOOD){
+                // dbg(GENERAL_CHANNEL, "Flood Packet from: %d\n", myMsg->src);
+                call Flood.receiveFlood(myMsg);
+            }
+
             return msg;
         }
         dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
@@ -87,6 +92,7 @@ implementation{
         if(!done)
             dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
             call Neigh.discNeigh();
+            call Flood.start();
         done = TRUE;
     }
 
