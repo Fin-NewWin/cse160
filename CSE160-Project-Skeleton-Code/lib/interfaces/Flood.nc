@@ -1,5 +1,6 @@
 #include "../../includes/packet.h"
 
 interface Flood{
-    command void start(pack* msg);
+    command void start();
+    command void receiveFlood(pack* msg);
 }

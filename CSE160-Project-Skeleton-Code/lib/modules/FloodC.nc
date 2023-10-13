@@ -14,5 +14,8 @@ implementation{
     components new SimpleSendC(AM_PACK);
     FloodP.SimpleSend -> SimpleSendC;
 
+    components NeighC as Neigh;
+    FloodP.Neigh -> Neigh;
+
 
 }
