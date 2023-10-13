@@ -15,7 +15,7 @@ implementation{
         floodPack->TTL = MAX_TTL;
         call sendTimer.startPeriodic(5000);
     }
-    
+
     event void sendTimer.fired(){
         floodPack->TTL = floodPack->TTL - 1;
         floodPack->src = TOS_NODE_ID;

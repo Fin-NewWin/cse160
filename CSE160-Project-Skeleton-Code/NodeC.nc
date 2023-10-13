@@ -31,6 +31,7 @@ implementation {
 
     components FloodC;
     Node.Flood -> FloodC;
+    Node.FloodC -> Node.Receive;
 
     components NeighC;
     Node.Neigh -> NeighC;

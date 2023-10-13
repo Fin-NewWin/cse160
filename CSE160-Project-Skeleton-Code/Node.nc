@@ -21,7 +21,7 @@ module Node{
 
     uses interface SimpleSend as Sender;
     uses interface Flood;
-    
+
     uses interface Neigh;
 
     uses interface CommandHandler;
@@ -90,10 +90,11 @@ implementation{
         makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
     }
 
-    event void neighborDisc.fired(){
+    event void Flood.fired(){
         if(!done)
-            dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
-            call Neigh.discNeigh();
+            dbg(FLOODING_CHANNEL, "FLOODING NETWORK HERE   \n");
+            //call Neigh.discNeigh();
+            call FloodC();
         done = TRUE;
     }
 
