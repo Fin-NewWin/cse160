@@ -34,7 +34,14 @@ implementation{
 
     bool done = FALSE;
     // Prototypes
-    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
+    void makePack(pack *Package, 
+                    uint16_t src, 
+                    uint16_t dest, 
+                    uint16_t TTL, 
+                    uint16_t Protocol, 
+                    uint16_t seq, 
+                    uint8_t *payload, 
+                    uint8_t length);
 
     event void Boot.booted(){
         call AMControl.start();
