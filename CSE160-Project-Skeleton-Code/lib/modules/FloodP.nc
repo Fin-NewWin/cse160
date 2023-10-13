@@ -6,35 +6,16 @@ module FloodP{
     uses interface Timer<TMilli> as sendTimer;
 }
 implementation{
-    uint8_t storedSeq[20] = {
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    };
+    uint8_t storedSeq[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,};
     uint8_t i;
     uint8_t j = 0;
     pack* floodPack;
     command void Flood.start(pack* msg) {
         floodPack = msg;
+        floodPack->TTL = MAX_TTL;
         call sendTimer.startPeriodic(5000);
     }
+    
     event void sendTimer.fired(){
         floodPack->TTL = floodPack->TTL - 1;
         floodPack->src = TOS_NODE_ID;

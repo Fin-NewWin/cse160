@@ -21,7 +21,7 @@ module Node{
 
     uses interface SimpleSend as Sender;
     uses interface Flood;
-
+    
     uses interface Neigh;
 
     uses interface CommandHandler;
