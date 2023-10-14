@@ -19,7 +19,9 @@ implementation{
 
     bool done = FALSE;
 
-    uint8_t bestSeq[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+    uint8_t seqSeen[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+
+    uint8_t bestTTL[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
 
 
     void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint8_t* payload, uint8_t length){
@@ -33,13 +35,13 @@ implementation{
 
 
     command void Flood.receiveFlood(pack* msg){
-        if(msg->src != TOS_NODE_ID && msg->TTL !=  0){
-            if(msg->seq < bestSeq[msg->src]){
-                bestSeq[msg->src] = msg->seq;
-                printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
-            }
+        if(msg->src != TOS_NODE_ID && msg->TTL !=  0 && seqSeen[msg->src] != msg->seq){
+            // if(msg->TTL < bestTTL[msg->src]){
+            //     bestTTL[msg->src] = msg->TTL;
+            //     printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
+            // }
+            seqSeen[msg->src] = msg->seq;
             msg->TTL--;
-            msg->seq++;
             for(i = 0; i < 20; i++){
                 if (list[i] != 255) {
                     call SimpleSend.send(*msg, i);
@@ -56,6 +58,9 @@ implementation{
 
     event void sendTimer.fired(){
         if(!done){
+            if (sequenceNum == 20) {
+                sequenceNum = 0;
+            }
             list = call Neigh.get();
             for(i = 0; i < 20; i++){
                 if (list[i] != 255) {
@@ -63,6 +68,7 @@ implementation{
                     call SimpleSend.send(floodPack, i);
                 }
             }
+            sequenceNum++;
         }
     }
 
