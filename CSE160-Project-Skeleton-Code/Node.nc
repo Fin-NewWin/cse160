@@ -34,7 +34,14 @@ implementation{
 
     bool done = FALSE;
     // Prototypes
-    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
+    void makePack(pack *Package, 
+                    uint16_t src, 
+                    uint16_t dest, 
+                    uint16_t TTL, 
+                    uint16_t Protocol, 
+                    uint16_t seq, 
+                    uint8_t *payload, 
+                    uint8_t length);
 
     event void Boot.booted(){
         call AMControl.start();
@@ -88,7 +95,7 @@ implementation{
         makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, 0, payload, PACKET_MAX_PAYLOAD_SIZE);
     }
 
-    event void neighborDisc.fired(){
+    event void Flood.fired(){
         if(!done)
             dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
             call Neigh.discNeigh();
