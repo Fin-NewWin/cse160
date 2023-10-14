@@ -21,7 +21,7 @@ implementation{
 
     uint8_t seqSeen[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
 
-    uint8_t bestTTL[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+    uint8_t bestTTL[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 
     void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint8_t* payload, uint8_t length){
@@ -36,10 +36,10 @@ implementation{
 
     command void Flood.receiveFlood(pack* msg){
         if(msg->src != TOS_NODE_ID && msg->TTL !=  0 && seqSeen[msg->src] != msg->seq){
-            // if(msg->TTL < bestTTL[msg->src]){
-            //     bestTTL[msg->src] = msg->TTL;
-            //     printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
-            // }
+            if(msg->TTL > bestTTL[msg->src]){
+                bestTTL[msg->src] = msg->TTL;
+                printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
+            }
             seqSeen[msg->src] = msg->seq;
             msg->TTL--;
             for(i = 0; i < 20; i++){
