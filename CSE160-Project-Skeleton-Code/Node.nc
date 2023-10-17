@@ -23,6 +23,7 @@ module Node{
 
     uses interface Neigh;
     uses interface Flood;
+    uses interface SimpleFlood;
     uses interface Dijk;
 
     uses interface CommandHandler;
@@ -74,7 +75,8 @@ implementation{
 
             if(myMsg->protocol == PROTOCOL_FLOOD){
                 // dbg(GENERAL_CHANNEL, "Flood Packet from: %d\n", myMsg->src);
-                call Flood.receiveFlood(myMsg);
+                call SimpleFlood.receiveSimpleFlood(myMsg);
+                //call Flood.receiveFlood(myMsg);
             }
 
             return msg;
@@ -93,9 +95,12 @@ implementation{
         if(!done)
             dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
             call Neigh.discNeigh();
-            call Flood.start();
+            //call Flood.start();
+            call SimpleFlood.start();
         done = TRUE;
     }
+
+    
 
     event void CommandHandler.printNeighbors(){}
 

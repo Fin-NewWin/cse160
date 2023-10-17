@@ -74,7 +74,7 @@ implementation{
             }
             list = call Neigh.get();
             for(i = 0; i < 20; i++){
-                if (list[i] != 255) {
+                if (list[i] == 1) {
                     makePack(&floodPack, TOS_NODE_ID, i, ttl, PROTOCOL_FLOOD, sequenceNum, list, packet); 
                     call SimpleSend.send(floodPack, i);
                 }

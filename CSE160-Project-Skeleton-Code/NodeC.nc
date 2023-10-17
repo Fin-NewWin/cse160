@@ -39,6 +39,9 @@ implementation {
     components DijkC;
     Node.Dijk -> DijkC;
 
+    components SimpleFloodC;
+    Node.SimpleFlood -> SimpleFloodC;
+
     components CommandHandlerC;
     Node.CommandHandler -> CommandHandlerC;
 
