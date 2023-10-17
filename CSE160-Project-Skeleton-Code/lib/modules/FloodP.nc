@@ -30,16 +30,26 @@ implementation{
         Package->TTL = TTL;
         Package->seq = seq;
         Package->protocol = protocol;
-        memcpy(Package->payload, &payload, length);
+        memcpy(Package->payload, payload, length);
     }
 
 
     command void Flood.receiveFlood(pack* msg){
+        // printf("me(%d)", msg->src);
+        // for(i = 0; i < 20; i++){
+        //     if(msg->payload[i] != 255){
+        //         printf("%d,", msg->payload[i]);
+                
+        //     } else {
+        //         printf("0,");
+        //     }
+        // }
+        // printf("\n");
         if(msg->src != TOS_NODE_ID && msg->TTL !=  0 && seqSeen[msg->src] != msg->seq){
-            if(msg->TTL > bestTTL[msg->src]){
-                bestTTL[msg->src] = msg->TTL;
-                printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
-            }
+            // if(msg->TTL > bestTTL[msg->src]){
+            //     bestTTL[msg->src] = msg->TTL;
+            //     printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
+            // }
             seqSeen[msg->src] = msg->seq;
             msg->TTL--;
             for(i = 0; i < 20; i++){

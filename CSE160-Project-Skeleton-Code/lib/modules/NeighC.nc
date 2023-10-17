@@ -5,9 +5,12 @@ configuration NeighC{
 }
 
 implementation{
-    components new SimpleSendC(AM_PACK);
     components NeighP;
     Neigh = NeighP;
 
+    components new SimpleSendC(AM_PACK);
     NeighP.SimpleSend -> SimpleSendC;
+
+    components DijkC as Dijk;
+    NeighP.Dijk -> Dijk;
 }

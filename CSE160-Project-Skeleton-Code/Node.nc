@@ -68,7 +68,7 @@ implementation{
 
             if(myMsg->protocol == PROTOCOL_NEIGHBOR_ACK){
                 // dbg(GENERAL_CHANNEL, "Neighbor Ack from: %d\n", myMsg->src);
-                call Neigh.receiveNeighAck(myMsg->TTL, myMsg->src);
+                call Neigh.receiveNeighAck(myMsg->TTL, myMsg->src, myMsg);
             }
 
             if(myMsg->protocol == PROTOCOL_FLOOD){
