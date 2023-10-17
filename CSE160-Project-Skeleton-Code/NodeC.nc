@@ -36,6 +36,9 @@ implementation {
     Node.Neigh -> NeighC;
     Node.neighborDisc -> neighborDisc;
 
+    components DijkC;
+    Node.Dijk -> DijkC;
+
     components CommandHandlerC;
     Node.CommandHandler -> CommandHandlerC;
 

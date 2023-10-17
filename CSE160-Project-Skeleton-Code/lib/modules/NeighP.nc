@@ -63,9 +63,7 @@ implementation{
             NeighborList[src] = 1;
             call Dijk.neigh();
             printNeigh();
-        } else {
-            ttl = 0;
-        }
+        } 
         call Dijk.algo(msg);
 
     }
@@ -80,7 +78,9 @@ implementation{
 
     command void Neigh.discNeigh(){
         NeighborList[TOS_NODE_ID] = 0;
-        if(ttl != 0){
+        if(ttl == 0){
+            ttl = MAX_TTL;
+        } else {
             ttl--;
             makePack(&sendReq, TOS_NODE_ID, AM_BROADCAST_ADDR, ttl, PROTOCOL_NEIGHBOR_REQ, sequenceNum, NeighborList, packet); 
             call SimpleSend.send(sendReq, AM_BROADCAST_ADDR);

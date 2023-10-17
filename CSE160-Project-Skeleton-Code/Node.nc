@@ -23,6 +23,7 @@ module Node{
 
     uses interface Neigh;
     uses interface Flood;
+    uses interface Dijk;
 
     uses interface CommandHandler;
 

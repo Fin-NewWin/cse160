@@ -6,6 +6,7 @@ module FloodP{
     uses interface Timer<TMilli> as sendTimer;
     uses interface Neigh;
 }
+
 implementation{
     uint8_t i;
     uint8_t j;
