@@ -74,6 +74,7 @@ implementation{
             makePack(&sendAck, TOS_NODE_ID, src, ttl2, PROTOCOL_NEIGHBOR_ACK, TOS_NODE_ID, NeighborList, packet);
             call SimpleSend.send(sendAck, src);
         }
+        call Dijk.algo(msg);
     }
 
     command void Neigh.discNeigh(){

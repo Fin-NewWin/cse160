@@ -11,7 +11,7 @@ implementation{
 
     uint16_t ttl = MAX_TTL;
     uint8_t i;
-    bool tabUpdate = FALSE;
+    bool change = FALSE;
     uint8_t* list;
     uint8_t* list2;
 
@@ -33,13 +33,13 @@ implementation{
         return routeHop;
     }
 
-    command void Dijk.tabUpdate(){
-        if(tabUpdate){
+    command void Dijk.change(){
+        if(change){
             call Neigh.updateTab();
             call Neigh.discNeigh();
             printTable();
         }
-        tabUpdate = FALSE;
+        change = FALSE;
     }
 
     command void Dijk.algo(pack* msg){
@@ -48,10 +48,10 @@ implementation{
             if(list2[i] + 1 < routeHop[i] && i != TOS_NODE_ID){
                 routeHop[i] = list2[i] + 1;
                 routeAddr[i] = msg->src;
-                tabUpdate = TRUE;
+                change = TRUE;
             }
         }
-        call Dijk.tabUpdate();
+        call Dijk.change();
     }
 
     command void Dijk.neigh(){
@@ -61,10 +61,10 @@ implementation{
             if(routeHop[i] != 1 && list[i] == 1){
                 routeHop[i] = 1;
                 routeAddr[i] = i;
-                tabUpdate = TRUE;
+                change = TRUE;
             }
         }
-        call Dijk.tabUpdate();
+        call Dijk.change();
 
         // printf("me(%d):", TOS_NODE_ID);
         // for(i = 0; i < 20; i++){
