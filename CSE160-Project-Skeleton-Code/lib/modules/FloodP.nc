@@ -54,7 +54,7 @@ implementation{
             seqSeen[msg->src] = msg->seq;
             msg->TTL--;
             for(i = 0; i < 20; i++){
-                if (list[i] != 255) {
+                if (list[i] == 1) {
                     call SimpleSend.send(*msg, i);
                 }
             }
