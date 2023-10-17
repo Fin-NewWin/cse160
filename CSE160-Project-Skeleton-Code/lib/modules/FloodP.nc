@@ -36,15 +36,17 @@ implementation{
 
     command void Flood.receiveFlood(pack* msg){
         if(msg->src != TOS_NODE_ID && msg->TTL !=  0 && seqSeen[msg->src] != msg->seq){
+            // if the source node != to current Node and the TTL is not 0 and the SEEN in the seen struct
             // if(msg->TTL < bestTTL[msg->src]){
             //     bestTTL[msg->src] = msg->TTL;
             //     printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
             // }
-            seqSeen[msg->src] = msg->seq;
-            msg->TTL--;
+
+            seqSeen[msg->src] = msg->seq; // add this to the seen struct
+            msg->TTL--; // decrement
             for(i = 0; i < 20; i++){
                 if (list[i] != 255) {
-                    call SimpleSend.send(*msg, i);
+                    call SimpleSend.send(*msg, i); //send packets to next
                 }
             }
         }
