@@ -13,7 +13,7 @@ echo "======================================"
 echo "          Create container            "
 echo "======================================"
 
-if [ $(sudo docker ps -a | grep "tiny" | wc -l) -eq 1 ]; then
+if [ $(sudo docker ps -a | grep "tiny" | wc -l) -ge 1 ]; then
     echo "Deleting old container"
     sudo docker stop tiny
     sudo docker rm -f tiny
