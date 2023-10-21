@@ -45,6 +45,9 @@ implementation{
         }
         change = FALSE;
     }
+    command void Dijk.printTable(){
+        printTable();
+    }
 
     command void Dijk.algo(pack* msg){
         list2 = msg->payload;

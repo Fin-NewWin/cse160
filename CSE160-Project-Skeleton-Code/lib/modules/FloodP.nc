@@ -50,6 +50,7 @@ implementation{
         // printf("\n");
         
         printf("Me(%d) from:%d sending:%d\n", TOS_NODE_ID, msg->src, msg->dest);
+        call Dijk.printTable();
         list2 = call Dijk.getAddr();
         if(TOS_NODE_ID != msg->dest){
             if (list2[msg->dest] != 255){

@@ -6,4 +6,5 @@ interface Dijk{
     command void change();
     command uint8_t* get();
     command uint8_t* getAddr();
+    command void printTable();
 }
