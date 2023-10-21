@@ -35,6 +35,8 @@ implementation{
     pack sendPackage;
 
     bool done = FALSE;
+    uint16_t nodeDest;
+    uint16_t nodeStart;
     // Prototypes
     void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
 
@@ -47,7 +49,8 @@ implementation{
     event void AMControl.startDone(error_t err){
         if(err == SUCCESS){
             dbg(GENERAL_CHANNEL, "Radio On\n");
-            call neighborDisc.startPeriodic(50000);
+            call neighborDisc.startPeriodic(1000);
+            call Neigh.discNeigh();
         }else{
             //Retry until successful
             call AMControl.start();
@@ -75,8 +78,8 @@ implementation{
 
             if(myMsg->protocol == PROTOCOL_FLOOD){
                 // dbg(GENERAL_CHANNEL, "Flood Packet from: %d\n", myMsg->src);
-                call SimpleFlood.receiveSimpleFlood(myMsg);
-                //call Flood.receiveFlood(myMsg);
+                // call SimpleFlood.receiveSimpleFlood(myMsg);
+                call Flood.receiveFlood(myMsg);
             }
 
             return msg;
@@ -92,12 +95,19 @@ implementation{
     }
 
     event void neighborDisc.fired(){
-        if(!done)
-            dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
-            call Neigh.discNeigh();
+        nodeStart = 6;
+        nodeDest = 7;
+        if(!done){
+            if(TOS_NODE_ID == nodeStart){
+                printf("Starting from node: %d to dest node: %d\n", TOS_NODE_ID, nodeDest);
+                call Flood.ping((uint16_t) nodeDest);
+            }
+        }
+            // dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
+            // call Neigh.discNeigh();
             //call Flood.start();
-            call SimpleFlood.start();
-        done = TRUE;
+            // call SimpleFlood.start();
+        // done = TRUE;
     }
 
     

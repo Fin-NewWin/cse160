@@ -17,5 +17,7 @@ implementation{
     components NeighC as Neigh;
     FloodP.Neigh -> Neigh;
 
+    components DijkC as Dijk;
+    FloodP.Dijk -> Dijk;
 
 }

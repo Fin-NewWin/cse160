@@ -5,4 +5,5 @@ interface Dijk{
     command void algo(pack* msg);
     command void change();
     command uint8_t* get();
+    command uint8_t* getAddr();
 }

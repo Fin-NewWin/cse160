@@ -5,6 +5,7 @@ module FloodP{
     uses interface SimpleSend;
     uses interface Timer<TMilli> as sendTimer;
     uses interface Neigh;
+    uses interface Dijk;
 }
 
 implementation{
@@ -15,6 +16,7 @@ implementation{
     uint16_t ttl = MAX_TTL;
     uint16_t sequenceNum = 0;
     uint8_t* list;
+    uint8_t* list2;
 
     pack floodPack;
 
@@ -46,25 +48,43 @@ implementation{
         //     }
         // }
         // printf("\n");
-        if(msg->src != TOS_NODE_ID && msg->TTL !=  0 && seqSeen[msg->src] != msg->seq){
-            // if(msg->TTL > bestTTL[msg->src]){
-            //     bestTTL[msg->src] = msg->TTL;
-            //     printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
-            // }
-            seqSeen[msg->src] = msg->seq;
-            msg->TTL--;
-            for(i = 0; i < 20; i++){
-                if (list[i] == 1) {
-                    call SimpleSend.send(*msg, i);
-                }
+        
+        printf("Me(%d) from:%d sending:%d\n", TOS_NODE_ID, msg->src, msg->dest);
+        list2 = call Dijk.getAddr();
+        if(TOS_NODE_ID != msg->dest){
+            if (list2[msg->dest] != 255){
+                msg->TTL--;
+                call SimpleSend.send(*msg, list2[msg->dest]);
             }
         }
+        // } else if (msg->src != TOS_NODE_ID && msg->TTL !=  0 && seqSeen[msg->src] != msg->seq){
+        //     // if(msg->TTL > bestTTL[msg->src]){
+        //     //     bestTTL[msg->src] = msg->TTL;
+        //     //     printf("Me(%d) from:%d seq:%d with TTL: %d\n", TOS_NODE_ID, msg->src, msg->seq, msg->TTL);
+        //     // }
+        //     seqSeen[msg->src] = msg->seq;
+        //     msg->TTL--;
+        //     for(i = 0; i < 20; i++){
+        //         if (list[i] == 1) {
+        //             call SimpleSend.send(*msg, i);
+        //         }
+        //     }
+        // }
     }
 
     command void Flood.start(){
         // printf("This shit from flood\n");
         // call Neigh.print();
         call sendTimer.startPeriodic(5000);
+    }
+
+    command void Flood.ping(uint16_t dest){
+        list = call Neigh.get();
+        list2 = call Dijk.getAddr();
+        if (list2[dest] != 255){
+            makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_FLOOD, 0, list, packet); 
+            call SimpleSend.send(floodPack, list2[dest]);
+        } 
     }
 
     event void sendTimer.fired(){

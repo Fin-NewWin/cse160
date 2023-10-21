@@ -34,8 +34,7 @@ implementation{
     void printNeigh(){
         printf("My(%d) current neighbors: [", TOS_NODE_ID);
         for(i = 0; i < 20; i++){
-            if(NeighborList[i] != 255 && NeighborList[i] != 0)
-            printf("%d, ", i);
+            if(NeighborList[i] == 1) printf("%d, ", i);
         }
         printf("]\n");
     }
@@ -61,11 +60,10 @@ implementation{
     command void Neigh.receiveNeighAck(uint16_t ttl, uint16_t src, pack* msg){
         if(NeighborList[src] == 255){
             NeighborList[src] = 1;
-            call Dijk.neigh();
             printNeigh();
+            call Dijk.neigh();
         } 
         call Dijk.algo(msg);
-
     }
 
     command void Neigh.receiveNeighReq(uint16_t ttl, uint16_t src, pack* msg){

@@ -33,6 +33,10 @@ implementation{
         return routeHop;
     }
 
+    command uint8_t* Dijk.getAddr(){
+        return routeAddr;
+    }
+
     command void Dijk.change(){
         if(change){
             call Neigh.updateTab();
