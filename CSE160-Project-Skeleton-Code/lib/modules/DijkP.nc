@@ -52,8 +52,8 @@ implementation{
     command void Dijk.algo(pack* msg){
         list2 = msg->payload;
         for(i = 0; i < 20; i++){
-            if(list2[i] + 1 < routeHop[i] && i != TOS_NODE_ID){
-                routeHop[i] = list2[i] + 1;
+            if(list2[i] + routeHop[msg->src] < routeHop[i] && i != TOS_NODE_ID){
+                routeHop[i] = list2[i] + routeHop[msg->src];
                 routeAddr[i] = msg->src;
                 change = TRUE;
             }

@@ -98,10 +98,10 @@ implementation{
         nodeStart = 6;
         nodeDest = 7;
         if(!done){
-            if(TOS_NODE_ID == nodeStart){
-                printf("Starting from node: %d to dest node: %d\n", TOS_NODE_ID, nodeDest);
-                call Flood.ping((uint16_t) nodeDest);
-            }
+            // if(TOS_NODE_ID == nodeStart){
+            //     printf("Starting from node: %d to dest node: %d\n", TOS_NODE_ID, nodeDest);
+            //     call Flood.ping((uint16_t) nodeDest);
+            // }
         }
             // dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
             // call Neigh.discNeigh();
