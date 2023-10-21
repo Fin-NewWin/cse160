@@ -27,7 +27,8 @@ sudo docker run -idt \
     --env="XAUTHORITY=$XAUTH"\
     --net=host \
     --privileged \
-    -v $(pwd)/CSE160-Project-Skeleton-Code:/opt/tinyos-main/apps/CSE160-Project-Skeleton-Code \
+    -w"/opt/tinyos-main/apps/CSE160-Project-Skeleton-Code" \
+    -v "$(pwd)"/CSE160-Project-Skeleton-Code:/opt/tinyos-main/apps/CSE160-Project-Skeleton-Code \
     2347c5a05ed4 \
     bash
 
