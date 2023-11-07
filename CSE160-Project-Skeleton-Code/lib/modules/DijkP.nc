@@ -20,13 +20,13 @@ implementation{
     uint8_t newList;
 
     void printTable(){
-        printf("me(%d):", TOS_NODE_ID);
-        for(i = 0; i < 20; i++){
-            if(routeHop[i] != 255){
-                printf("%d(%d)%d, ", routeHop[i], routeAddr[i], i);
-            }
-        }
-        printf("\n");
+        // printf("me(%d):", TOS_NODE_ID);
+        // for(i = 0; i < 20; i++){
+        //     if(routeHop[i] != 255){
+        //         printf("%d(%d)%d, ", routeHop[i], routeAddr[i], i);
+        //     }
+        // }
+        // printf("\n");
     }
 
     command uint8_t* Dijk.get(){

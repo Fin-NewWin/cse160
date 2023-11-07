@@ -81,7 +81,9 @@ implementation{
                 // call SimpleFlood.receiveSimpleFlood(myMsg);
                 call Flood.receiveFlood(myMsg);
             }
-
+            if(myMsg->protocol == PROTOCOL_TCP){
+                call Flood.threeWayHandAck(myMsg);
+            }
             return msg;
         }
         dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
@@ -95,13 +97,14 @@ implementation{
     }
 
     event void neighborDisc.fired(){
-        nodeStart = 6;
-        nodeDest = 7;
+        nodeStart = 1;
+        nodeDest = 9;
         if(!done){
-            // if(TOS_NODE_ID == nodeStart){
-            //     printf("Starting from node: %d to dest node: %d\n", TOS_NODE_ID, nodeDest);
-            //     call Flood.ping((uint16_t) nodeDest);
-            // }
+            if(TOS_NODE_ID == nodeStart){
+                // printf("Starting from node: %d to dest node: %d\n", TOS_NODE_ID, nodeDest);
+                // call Flood.ping((uint16_t) nodeDest);
+                call Flood.threeWayHandshake((uint16_t) nodeDest);
+            }
         }
             // dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
             // call Neigh.discNeigh();

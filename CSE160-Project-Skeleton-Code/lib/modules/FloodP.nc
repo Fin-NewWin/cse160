@@ -15,16 +15,23 @@ implementation{
 
     uint16_t ttl = MAX_TTL;
     uint16_t sequenceNum = 0;
+    uint16_t seq2 = 0;
     uint8_t* list;
     uint8_t* list2;
 
     pack floodPack;
 
     bool done = FALSE;
+    bool wait = FALSE;
+    bool sender = TRUE;
+
+    uint8_t dst;
 
     uint8_t seqSeen[20] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
 
     uint8_t bestTTL[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    bool sendFlag[20] = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE};
+
 
 
     void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint8_t* payload, uint8_t length){
@@ -53,6 +60,7 @@ implementation{
         call Dijk.printTable();
         list2 = call Dijk.getAddr();
         if(TOS_NODE_ID != msg->dest){
+
             if (list2[msg->dest] != 255){
                 msg->TTL--;
                 call SimpleSend.send(*msg, list2[msg->dest]);
@@ -86,6 +94,54 @@ implementation{
             makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_FLOOD, 0, list, packet); 
             call SimpleSend.send(floodPack, list2[dest]);
         } 
+    }
+
+    command void Flood.sendFun(uint16_t dest){
+        printf("Sending in the clowns %d\n", TOS_NODE_ID);
+        list = call Neigh.get();
+        list2 = call Dijk.getAddr();
+        makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_FLOOD, 0, list, packet);
+        call SimpleSend.send(floodPack, list2[dest]);
+    }
+
+    command void Flood.threeWayHandAck(pack* msg){
+        if (TOS_NODE_ID != msg->dest){
+            call Flood.receiveFlood(msg);
+        } else {
+            list = call Neigh.get();
+            list2 = call Dijk.getAddr();
+            dst = msg->src;
+            if(!wait){
+                printf("Got that from %d\n", msg->src);
+                if (list2[dst] != 255){
+                    makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP, 0, list, packet);
+                    call SimpleSend.send(floodPack, list2[dst]);
+                    seq2++;
+                    call Flood.threeWayHandshake(dst);
+                    wait = FALSE;
+                }
+            } else if (sender && wait){
+                makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP, 0, list, packet);
+                call SimpleSend.send(floodPack, list2[dst]);
+                
+                printf("Preparing to send packets\n");
+                call Flood.sendFun(dst);
+            } 
+        }
+    }
+
+    command void Flood.threeWayHandshake(uint16_t dest){
+        sender = TRUE;
+        if(!wait){
+            printf("Starting node: %d to node: %d\n", TOS_NODE_ID, dest);
+            list = call Neigh.get();
+            list2 = call Dijk.getAddr();
+            if (list2[dest] != 255){
+                makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP, seq2, list, packet); 
+                call SimpleSend.send(floodPack, list2[dest]);
+                wait = TRUE;
+            } 
+        }
     }
 
     event void sendTimer.fired(){
