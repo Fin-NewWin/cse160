@@ -65,7 +65,6 @@ implementation{
         if(len==sizeof(pack)){
             pack* myMsg=(pack*) payload;
             // dbg(GENERAL_CHANNEL, "Packet Received with TTL: %d\n", myMsg->TTL);
-
             if(myMsg->protocol == PROTOCOL_NEIGHBOR_REQ){
                 // dbg(GENERAL_CHANNEL, "Recieved Payload From: %d %d\n", myMsg->seq, myMsg->TTL);
                 call Neigh.receiveNeighReq(myMsg->TTL, myMsg->src, myMsg);
@@ -87,7 +86,7 @@ implementation{
             if(myMsg->protocol == PROTOCOL_TCP){
                 call Flood.ackFun(myMsg);
             }
-            if(myMsg->protocol == PROTOCOL_TCP_SEN){
+            if(myMsg->protocol == PROTOCOL_TCP_DATA){
                 call Flood.sendAckFun(myMsg);
             }
             if(myMsg->protocol == PROTOCOL_TCP_FIN){

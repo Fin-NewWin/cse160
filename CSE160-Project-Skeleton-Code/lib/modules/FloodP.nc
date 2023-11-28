@@ -98,140 +98,139 @@ implementation{
 		//         }
 		//     }
 		// }
-}
-
-command void Flood.start(){
-	// printf("This shit from flood\n");
-	// call Neigh.print();
-	call sendTimer.startPeriodic(5000);
-}
-
-command void Flood.ping(uint16_t dest){
-	list = call Neigh.get();
-	list2 = call Dijk.getAddr();
-	if (list2[dest] != 255){
-		makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_FLOOD, 0, list, packet);
-		call SimpleSend.send(floodPack, list2[dest]);
 	}
-}
 
-command void Flood.sendFun(uint16_t dest){
-	printf("Sending in the clowns %d\n", TOS_NODE_ID);
-	list = call Neigh.get();
-	list2 = call Dijk.getAddr();
-	makeNew(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
-	call SimpleSend.send(floodPack, list2[dest]);
-	seqSend++;
-}
-
-command void Flood.sendAckFun(pack* msg){
-	if(msg->dest == TOS_NODE_ID ){
-		list = call Neigh.get();
-		list2 = call Dijk.getAddr();
-		if(sendAck == msg->seq && seqSend <= 5){
-			makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
-			call SimpleSend.send(floodPack, list2[msg->src]);
-			sendAck++;
-			seqSend++;
-		} else if(seqSend > 5) {
-			printf("Closing connection sending FIN\n");
-			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, seqSend, pay[seqSend - 1], packet);
-			call SimpleSend.send(floodPack, list2[msg->src]);
-		}
-	} else {
-		call Flood.receiveFlood(msg);
+	command void Flood.start(){
+		// printf("This shit from flood\n");
+		// call Neigh.print();
+		call sendTimer.startPeriodic(5000);
 	}
-}
 
-command void Flood.ackFIN(pack* msg){
-	if(msg->dest == TOS_NODE_ID ){
-		list = call Neigh.get();
-		list2 = call Dijk.getAddr();
-		if(sendAck == msg->seq){
-			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, 0, list, packet);
-			call SimpleSend.send(floodPack, list2[msg->src]);
-		}
-	} else {
-		call Flood.receiveFlood(msg);
-	}
-}
-
-command void Flood.ackFun(pack* msg){
-	if(msg->dest == TOS_NODE_ID ){
-		if (sendAck == msg->seq){
-			iter = 0;
-			printf("Message %d: ", sendAck);
-			while(*(msg->payload + sizeof(uint8_t) * iter) != '\0'){
-				printf("%c", *(msg->payload + sizeof(uint8_t) * iter));
-				iter++;
-			}
-			printf("\n");
-
-			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_SEN, sendAck, list, packet);
-			call SimpleSend.send(floodPack, list2[msg->src]);
-			sendAck++;
-		}
-	} else {
-		call Flood.receiveFlood(msg);
-	}
-}
-
-command void Flood.threeWayHandAck(pack* msg){
-	if (TOS_NODE_ID != msg->dest){
-		call Flood.receiveFlood(msg);
-	} else {
-		list = call Neigh.get();
-		list2 = call Dijk.getAddr();
-		dst = msg->src;
-		if(!sendFlag[dst]){ // meaning its the receiver
-			printf("Got that from %d\n", msg->src);
-			if (list2[dst] != 255){
-				sendFlag[dst] = TRUE;
-				senderFlag[dst] = FALSE;
-				makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP_ACK, 0, list, packet);
-				call SimpleSend.send(floodPack, list2[dst]);
-				seq2++;
-				call Flood.threeWayHandshake(dst);
-			}
-		} else if (sendFlag[dst] && senderFlag[dst]){
-			makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP_ACK, 0, list, packet);
-			call SimpleSend.send(floodPack, list2[dst]);
-
-			printf("Preparing to send packets\n");
-			call Flood.sendFun(dst);
-		}
-	}
-}
-
-command void Flood.threeWayHandshake(uint16_t dest){
-
-	sendFlag[dest] = TRUE;
-	if(!wait){
-		printf("Starting node: %d to node: %d\n", TOS_NODE_ID, dest);
+	command void Flood.ping(uint16_t dest){
 		list = call Neigh.get();
 		list2 = call Dijk.getAddr();
 		if (list2[dest] != 255){
-			makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP_SYN, seq2, list, packet);
+			makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_FLOOD, 0, list, packet);
 			call SimpleSend.send(floodPack, list2[dest]);
-			wait = TRUE;
 		}
 	}
-}
 
-event void sendTimer.fired(){
-	if(!done){
-		if (sequenceNum == 20) {
-			sequenceNum = 0;
-		}
+	command void Flood.sendFun(uint16_t dest){
+		printf("Sending in the clowns %d\n", TOS_NODE_ID);
 		list = call Neigh.get();
-		for(i = 0; i < 20; i++){
-			if (list[i] == 1) {
-				makePack(&floodPack, TOS_NODE_ID, i, ttl, PROTOCOL_FLOOD, sequenceNum, list, packet);
-				call SimpleSend.send(floodPack, i);
+		list2 = call Dijk.getAddr();
+		makeNew(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
+		call SimpleSend.send(floodPack, list2[dest]);
+		seqSend++;
+	}
+
+	command void Flood.sendAckFun(pack* msg){
+		if(msg->dest == TOS_NODE_ID ){
+			list = call Neigh.get();
+			list2 = call Dijk.getAddr();
+			if(sendAck == msg->seq && seqSend <= 5){
+				makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
+				call SimpleSend.send(floodPack, list2[msg->src]);
+				sendAck++;
+				seqSend++;
+			} else if(seqSend > 5) {
+				printf("Closing connection sending FIN\n");
+				makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, seqSend, pay[seqSend - 1], packet);
+				call SimpleSend.send(floodPack, list2[msg->src]);
+			}
+		} else {
+			call Flood.receiveFlood(msg);
+		}
+	}
+
+	command void Flood.ackFIN(pack* msg){
+		if(msg->dest == TOS_NODE_ID ){
+			list = call Neigh.get();
+			list2 = call Dijk.getAddr();
+			if(sendAck == msg->seq){
+				makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, 0, list, packet);
+				call SimpleSend.send(floodPack, list2[msg->src]);
+			}
+		} else {
+			call Flood.receiveFlood(msg);
+		}
+	}
+
+	command void Flood.ackFun(pack* msg){
+		if(msg->dest == TOS_NODE_ID ){
+			if (sendAck == msg->seq){
+				iter = 0;
+				printf("Message %d: ", sendAck);
+				while(*(msg->payload + sizeof(uint8_t) * iter) != '\0'){
+					printf("%c", *(msg->payload + sizeof(uint8_t) * iter));
+					iter++;
+				}
+				printf("\n");
+
+				makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_DATA, sendAck, list, packet);
+				call SimpleSend.send(floodPack, list2[msg->src]);
+				sendAck++;
+			}
+		} else {
+			call Flood.receiveFlood(msg);
+		}
+	}
+
+	command void Flood.threeWayHandAck(pack* msg){
+		if (TOS_NODE_ID != msg->dest){
+			call Flood.receiveFlood(msg);
+		} else {
+			list = call Neigh.get();
+			list2 = call Dijk.getAddr();
+			dst = msg->src;
+			if(!sendFlag[dst]){ // meaning its the receiver
+				printf("Got that from %d\n", msg->src);
+				if (list2[dst] != 255){
+					sendFlag[dst] = TRUE;
+					senderFlag[dst] = FALSE;
+					makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP_ACK, 0, list, packet);
+					call SimpleSend.send(floodPack, list2[dst]);
+					seq2++;
+					call Flood.threeWayHandshake(dst);
+				}
+			} else if (sendFlag[dst] && senderFlag[dst]){
+				makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP_ACK, 0, list, packet);
+				call SimpleSend.send(floodPack, list2[dst]);
+
+				printf("Preparing to send packets\n");
+				call Flood.sendFun(dst);
 			}
 		}
-		sequenceNum++;
 	}
-}
+
+	command void Flood.threeWayHandshake(uint16_t dest){
+
+		sendFlag[dest] = TRUE;
+		if(!wait){
+			printf("Starting node: %d to node: %d\n", TOS_NODE_ID, dest);
+			list = call Neigh.get();
+			list2 = call Dijk.getAddr();
+			if (list2[dest] != 255){
+				makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP_SYN, seq2, list, packet);
+				call SimpleSend.send(floodPack, list2[dest]);
+				wait = TRUE;
+			}
+		}
+	}
+	event void sendTimer.fired(){
+		if(!done){
+			if (sequenceNum == 20) {
+				sequenceNum = 0;
+			}
+			list = call Neigh.get();
+			for(i = 0; i < 20; i++){
+				if (list[i] == 1) {
+					makePack(&floodPack, TOS_NODE_ID, i, ttl, PROTOCOL_FLOOD, sequenceNum, list, packet);
+					call SimpleSend.send(floodPack, i);
+				}
+			}
+			sequenceNum++;
+		}
+	}
 
 }
