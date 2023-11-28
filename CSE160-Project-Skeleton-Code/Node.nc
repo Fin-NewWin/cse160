@@ -81,9 +81,16 @@ implementation{
                 // call SimpleFlood.receiveSimpleFlood(myMsg);
                 call Flood.receiveFlood(myMsg);
             }
-            if(myMsg->protocol == PROTOCOL_TCP){
+            if(myMsg->protocol == PROTOCOL_TCP_SYN || myMsg->protocol == PROTOCOL_TCP_ACK){
                 call Flood.threeWayHandAck(myMsg);
             }
+            if(myMsg->protocol == PROTOCOL_TCP){
+                call Flood.ackFun(myMsg);
+            }
+            // if(myMsg->protocol == PROTOCOL_TCP_FIN){
+            //     call Flood.sendAckFun(myMsg);
+
+            // }
             return msg;
         }
         dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
@@ -113,7 +120,7 @@ implementation{
         // done = TRUE;
     }
 
-    
+
 
     event void CommandHandler.printNeighbors(){}
 
