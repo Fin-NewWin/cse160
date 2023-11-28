@@ -127,7 +127,6 @@ command void Flood.sendFun(uint16_t dest){
 command void Flood.sendAckFun(pack* msg){
 	if(msg->dest == TOS_NODE_ID ){
 		if(sendAck == msg->seq && seqSend <= 5){
-			// printf("Got back the ack from %d\n", msg->seq);
 			list = call Neigh.get();
 			list2 = call Dijk.getAddr();
 			makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
@@ -151,7 +150,7 @@ command void Flood.ackFun(pack* msg){
 			}
 			printf("\n");
 
-			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, msg->seq, list, packet);
+			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_SEN, sendAck, list, packet);
 			call SimpleSend.send(floodPack, list2[msg->src]);
 			sendAck++;
 		}

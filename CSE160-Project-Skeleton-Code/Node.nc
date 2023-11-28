@@ -87,7 +87,7 @@ implementation{
             if(myMsg->protocol == PROTOCOL_TCP){
                 call Flood.ackFun(myMsg);
             }
-            if(myMsg->protocol == PROTOCOL_TCP_FIN){
+            if(myMsg->protocol == PROTOCOL_TCP_SEN){
                 call Flood.sendAckFun(myMsg);
             }
             return msg;
