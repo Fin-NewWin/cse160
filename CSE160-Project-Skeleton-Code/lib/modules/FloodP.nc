@@ -36,8 +36,7 @@ implementation{
 	uint16_t seqSend = 1;
 	uint16_t sendAck = 1;
 
-	uint16_t* pay = "01294";
-	char* asd;
+	uint8_t* pay = "01294";
 
 	uint8_t iter = 0;
 
@@ -54,7 +53,7 @@ implementation{
 		memcpy(Package->payload, payload, length);
 	}
 
-	void makeNew(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint16_t* payload, uint8_t length){
+	void makeNew(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t protocol, uint16_t seq, uint8_t* payload, uint8_t length){
 		Package->src = src;
 		Package->dest = dest;
 		Package->TTL = TTL;
@@ -76,7 +75,7 @@ implementation{
 		// }
 		// printf("\n");
 
-		printf("Me(%d) from:%d sending:%d\n", TOS_NODE_ID, msg->src, msg->dest);
+		// printf("Me(%d) from:%d sending:%d\n", TOS_NODE_ID, msg->src, msg->dest);
 		call Dijk.printTable();
 		list2 = call Dijk.getAddr();
 		if(TOS_NODE_ID != msg->dest){
@@ -125,21 +124,21 @@ command void Flood.sendFun(uint16_t dest){
 	seqSend++;
 }
 
-// command void Flood.sendAckFun(pack* msg){
-// 	if(msg->dest == TOS_NODE_ID ){
-// 		if(sendAck == msg->seq){
-// 			printf("Sending in the clowns %d\n", sendAck);
-// 			list = call Neigh.get();
-// 			list2 = call Dijk.getAddr();
-// 			makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP, msg->seq, list, packet);
-// 			call SimpleSend.send(floodPack, list2[dest]);
-// 			sendAck++;
-// 			seqSend++;
-// 		}
-// 	} else {
-// 		call Flood.receiveFlood(msg);
-// 	}
-// }
+command void Flood.sendAckFun(pack* msg){
+	if(msg->dest == TOS_NODE_ID ){
+		if(sendAck == msg->seq && seqSend <= 5){
+			// printf("Got back the ack from %d\n", msg->seq);
+			list = call Neigh.get();
+			list2 = call Dijk.getAddr();
+			makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay, packet);
+			call SimpleSend.send(floodPack, list2[msg->src]);
+			sendAck++;
+			seqSend++;
+		}
+	} else {
+		call Flood.receiveFlood(msg);
+	}
+}
 
 command void Flood.ackFun(pack* msg){
 	if(msg->dest == TOS_NODE_ID ){
@@ -149,6 +148,7 @@ command void Flood.ackFun(pack* msg){
 				printf("%c", *(msg->payload + sizeof(uint8_t) * iter++));
 			}
 			printf("\n");
+
 			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, msg->seq, list, packet);
 			call SimpleSend.send(floodPack, list2[msg->src]);
 			sendAck++;

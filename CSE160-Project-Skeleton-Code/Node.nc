@@ -87,10 +87,9 @@ implementation{
             if(myMsg->protocol == PROTOCOL_TCP){
                 call Flood.ackFun(myMsg);
             }
-            // if(myMsg->protocol == PROTOCOL_TCP_FIN){
-            //     call Flood.sendAckFun(myMsg);
-
-            // }
+            if(myMsg->protocol == PROTOCOL_TCP_FIN){
+                call Flood.sendAckFun(myMsg);
+            }
             return msg;
         }
         dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
