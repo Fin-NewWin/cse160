@@ -9,4 +9,5 @@ interface Flood{
     command void sendFun(uint16_t dest);
     command void ackFun(pack* msg);
     command void sendAckFun(pack* msg);
+    command void ackFIN(pack* msg);
 }

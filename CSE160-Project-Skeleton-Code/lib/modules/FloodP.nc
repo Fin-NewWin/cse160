@@ -126,13 +126,30 @@ command void Flood.sendFun(uint16_t dest){
 
 command void Flood.sendAckFun(pack* msg){
 	if(msg->dest == TOS_NODE_ID ){
+		list = call Neigh.get();
+		list2 = call Dijk.getAddr();
 		if(sendAck == msg->seq && seqSend <= 5){
-			list = call Neigh.get();
-			list2 = call Dijk.getAddr();
 			makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
 			call SimpleSend.send(floodPack, list2[msg->src]);
 			sendAck++;
 			seqSend++;
+		} else if(seqSend > 5) {
+			printf("Closing connection sending FIN\n");
+			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, seqSend, pay[seqSend - 1], packet);
+			call SimpleSend.send(floodPack, list2[msg->src]);
+		}
+	} else {
+		call Flood.receiveFlood(msg);
+	}
+}
+
+command void Flood.ackFIN(pack* msg){
+	if(msg->dest == TOS_NODE_ID ){
+		list = call Neigh.get();
+		list2 = call Dijk.getAddr();
+		if(sendAck == msg->seq){
+			makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_FIN, 0, list, packet);
+			call SimpleSend.send(floodPack, list2[msg->src]);
 		}
 	} else {
 		call Flood.receiveFlood(msg);
