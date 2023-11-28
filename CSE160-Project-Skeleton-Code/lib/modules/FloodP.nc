@@ -36,7 +36,7 @@ implementation{
 	uint16_t seqSend = 1;
 	uint16_t sendAck = 1;
 
-	uint8_t* pay = "01294";
+	uint8_t* pay[] = {"Hello", "World!", "My", "name's", "Phien :)"};
 
 	uint8_t iter = 0;
 
@@ -119,7 +119,7 @@ command void Flood.sendFun(uint16_t dest){
 	printf("Sending in the clowns %d\n", TOS_NODE_ID);
 	list = call Neigh.get();
 	list2 = call Dijk.getAddr();
-	makeNew(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP, seqSend, pay, packet);
+	makeNew(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
 	call SimpleSend.send(floodPack, list2[dest]);
 	seqSend++;
 }
@@ -130,7 +130,7 @@ command void Flood.sendAckFun(pack* msg){
 			// printf("Got back the ack from %d\n", msg->seq);
 			list = call Neigh.get();
 			list2 = call Dijk.getAddr();
-			makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay, packet);
+			makeNew(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP, seqSend, pay[seqSend - 1], packet);
 			call SimpleSend.send(floodPack, list2[msg->src]);
 			sendAck++;
 			seqSend++;
@@ -144,8 +144,10 @@ command void Flood.ackFun(pack* msg){
 	if(msg->dest == TOS_NODE_ID ){
 		if (sendAck == msg->seq){
 			iter = 0;
+			printf("Message %d: ", sendAck);
 			while(*(msg->payload + sizeof(uint8_t) * iter) != '\0'){
-				printf("%c", *(msg->payload + sizeof(uint8_t) * iter++));
+				printf("%c", *(msg->payload + sizeof(uint8_t) * iter));
+				iter++;
 			}
 			printf("\n");
 
