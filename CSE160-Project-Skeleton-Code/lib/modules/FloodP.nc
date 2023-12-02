@@ -144,7 +144,7 @@ implementation{
 	}
 
 	command void Flood.ackFIN(pack* msg){
-		if(msg->dest == TOS_NODE_ID ){
+		if(msg->dest == TOS_NODE_ID ){ //checks is source node 
 			list = call Neigh.get();
 			list2 = call Dijk.getAddr();
 			if(sendAck == msg->seq){
@@ -177,19 +177,21 @@ implementation{
 	}
 
 	command void Flood.threeWayHandAck(pack* msg){
-		if (TOS_NODE_ID != msg->dest){
-			call Flood.receiveFlood(msg);
+		if (TOS_NODE_ID != msg->dest){ //checks if current node is nto as dest
+			call Flood.receiveFlood(msg); // if not, then call to send to next pack
 		} else {
-			list = call Neigh.get();
-			list2 = call Dijk.getAddr();
-			dst = msg->src;
-			if(!sendFlag[dst]){ // meaning its the receiver
+			list = call Neigh.get(); // get list of neighbors
+			list2 = call Dijk.getAddr(); // get list of addresses
+			dst = msg->src; 
+			if(!sendFlag[dst]){ // checks if
 				printf("Got that from %d\n", msg->src);
-				if (list2[dst] != 255){
-					sendFlag[dst] = TRUE;
+				if (list2[dst] != 255){ //checks if th current dst is valid
+					sendFlag[dst] = TRUE; //setting the flags as true
 					senderFlag[dst] = FALSE;
+					//this means that the node has sent and doesnt need to send anymore
 					makePack(&floodPack, TOS_NODE_ID, dst, ttl, PROTOCOL_TCP_ACK, 0, list, packet);
 					call SimpleSend.send(floodPack, list2[dst]);
+					//send the packet next
 					seq2++;
 					call Flood.threeWayHandshake(dst);
 				}
@@ -206,11 +208,15 @@ implementation{
 	command void Flood.threeWayHandshake(uint16_t dest){
 
 		sendFlag[dest] = TRUE;
+		//this indicates that the node has sent
 		if(!wait){
 			printf("Starting node: %d to node: %d\n", TOS_NODE_ID, dest);
-			list = call Neigh.get();
-			list2 = call Dijk.getAddr();
+			list = call Neigh.get(); 
+			//list of nieghbors
+			list2 = call Dijk.getAddr(); 
+			//list of addresses using dijkstra
 			if (list2[dest] != 255){
+				//check to see if dest is valid
 				makePack(&floodPack, TOS_NODE_ID, dest, ttl, PROTOCOL_TCP_SYN, seq2, list, packet);
 				call SimpleSend.send(floodPack, list2[dest]);
 				wait = TRUE;
