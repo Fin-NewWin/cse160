@@ -32,6 +32,7 @@ implementation{
 	uint8_t bestTTL[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	bool sendFlag[20] = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE};
 	bool senderFlag[20] = {TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE};
+	bool conClient[20] = {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE};
 
 	uint16_t seqSend = 1;
 	uint16_t sendAck = 1;
@@ -39,6 +40,8 @@ implementation{
 	uint8_t* pay[] = {"Hello", "World!", "My", "name's", "Phien :)"};
 
 	uint8_t iter = 0;
+
+	uint8_t* message = "Hello ";
 
 
 
@@ -144,7 +147,7 @@ implementation{
 	}
 
 	command void Flood.ackFIN(pack* msg){
-		if(msg->dest == TOS_NODE_ID ){ //checks is source node 
+		if(msg->dest == TOS_NODE_ID ){ //checks is source node
 			list = call Neigh.get();
 			list2 = call Dijk.getAddr();
 			if(sendAck == msg->seq){
@@ -182,7 +185,7 @@ implementation{
 		} else {
 			list = call Neigh.get(); // get list of neighbors
 			list2 = call Dijk.getAddr(); // get list of addresses
-			dst = msg->src; 
+			dst = msg->src;
 			if(!sendFlag[dst]){ // checks if
 				printf("Got that from %d\n", msg->src);
 				if (list2[dst] != 255){ //checks if th current dst is valid
@@ -205,15 +208,76 @@ implementation{
 		}
 	}
 
+	command void Flood.sendBackMsg(uint8_t* payload){
+		list = call Neigh.get();
+		list2 = call Dijk.getAddr();
+		for(i = 0; i < 10; i++){
+			if(conClient[i] == TRUE){
+				printf("Sending to %d\n", i);
+				makePack(&floodPack, TOS_NODE_ID, i, ttl, PROTOCOL_MSG, 0, payload, packet);
+				call SimpleSend.send(floodPack, list2[i]);
+			}
+
+		}
+	}
+
+	command void Flood.receiveBackMsg(pack* msg){
+		if(msg->dest == TOS_NODE_ID ){
+			iter = 0;
+			while(*(msg->payload + sizeof(uint8_t) * iter) != '\0'){
+				printf("%c", *(msg->payload + sizeof(uint8_t) * iter));
+				iter++;
+			}
+			printf("\n");
+
+		} else {
+			call Flood.receiveFlood(msg);
+		}
+	}
+
+	command void Flood.receiveMsg(pack* msg){
+		if(msg->dest == TOS_NODE_ID ){
+			conClient[msg->src] = TRUE;
+			iter = 0;
+			while(*(msg->payload + sizeof(uint8_t) * iter) != '\0'){
+				printf("%c", *(msg->payload + sizeof(uint8_t) * iter));
+				iter++;
+			}
+			printf("\n");
+
+			call Flood.sendBackMsg(message);
+
+			// list = call Neigh.get();
+			// list2 = call Dijk.getAddr();
+			// makePack(&floodPack, TOS_NODE_ID, msg->src, ttl, PROTOCOL_TCP_ACK, 0, , packet);
+			// call SimpleSend.send(floodPack, list2[msg->src]);
+		} else {
+			call Flood.receiveFlood(msg);
+		}
+	}
+
+	command void Flood.sendMsg(uint8_t* payload){
+		if(!wait){
+			list = call Neigh.get();
+			list2 = call Dijk.getAddr();
+			if (list2[(uint8_t) 1] != 255){
+				wait = TRUE;
+				makePack(&floodPack, TOS_NODE_ID, (uint8_t) 1, ttl, PROTOCOL_MESSAGE, seq2, payload, packet);
+				call SimpleSend.send(floodPack, list2[(uint8_t) 1]);
+			}
+		}
+	}
+
+
 	command void Flood.threeWayHandshake(uint16_t dest){
 
 		sendFlag[dest] = TRUE;
 		//this indicates that the node has sent
 		if(!wait){
 			printf("Starting node: %d to node: %d\n", TOS_NODE_ID, dest);
-			list = call Neigh.get(); 
+			list = call Neigh.get();
 			//list of nieghbors
-			list2 = call Dijk.getAddr(); 
+			list2 = call Dijk.getAddr();
 			//list of addresses using dijkstra
 			if (list2[dest] != 255){
 				//check to see if dest is valid

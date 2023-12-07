@@ -92,11 +92,19 @@ implementation{
             if(myMsg->protocol == PROTOCOL_TCP_FIN){
                 call Flood.ackFIN(myMsg);
             }
+            if(myMsg->protocol == PROTOCOL_MSG){
+                call Flood.receiveBackMsg(myMsg);
+            }
+            if(TOS_NODE_ID == 1 && myMsg->protocol == PROTOCOL_MESSAGE){
+                call Flood.receiveMsg(myMsg);
+
+            }
             return msg;
         }
         dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
         return msg;
     }
+
 
 
     event void CommandHandler.ping(uint16_t destination, uint8_t *payload){
@@ -106,14 +114,18 @@ implementation{
 
     event void neighborDisc.fired(){
         nodeStart = 1;
-        nodeDest = 9;
+        nodeDest = 3;
         if(!done){
             if(TOS_NODE_ID == nodeStart){
                 // printf("Starting from node: %d to dest node: %d\n", TOS_NODE_ID, nodeDest);
                 // call Flood.ping((uint16_t) nodeDest);
-                call Flood.threeWayHandshake((uint16_t) nodeDest);
+                // call Flood.threeWayHandshake((uint16_t) nodeDest);
+            }
+            if(TOS_NODE_ID == nodeDest){
+                call Flood.sendMsg((uint8_t*) "Hello fin 3");
             }
         }
+
             // dbg(FLOODING_CHANNEL, "FLOODING NETWORK\n");
             // call Neigh.discNeigh();
             //call Flood.start();
