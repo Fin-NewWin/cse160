@@ -95,7 +95,7 @@ implementation{
             if(myMsg->protocol == PROTOCOL_MSG){
                 call Flood.receiveBackMsg(myMsg);
             }
-            if(TOS_NODE_ID == 1 && myMsg->protocol == PROTOCOL_MESSAGE){
+            if(myMsg->protocol == PROTOCOL_MESSAGE){
                 call Flood.receiveMsg(myMsg);
 
             }
