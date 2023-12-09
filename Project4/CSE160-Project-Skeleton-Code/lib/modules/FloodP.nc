@@ -257,20 +257,13 @@ implementation{
 	}
 
 	command void Flood.sendMsg(uint8_t* payload){
-		if(!wait){ //checks if the node is waiting
-			list = call Neigh.get(); 
-			//list of neighborsby node id
+		if(!wait){
+			list = call Neigh.get();
 			list2 = call Dijk.getAddr();
-			//list of addresses using dijkstra
 			if (list2[(uint8_t) 1] != 255){
-				//check to see if dest is valid 
 				wait = TRUE;
-				//set the wait flag to true
 				makePack(&floodPack, TOS_NODE_ID, (uint8_t) 1, ttl, PROTOCOL_MESSAGE, seq2, payload, packet);
-				//make the packet to send 
 				call SimpleSend.send(floodPack, list2[(uint8_t) 1]);
-				//send the packet to the next node using sumple send 
-
 			}
 		}
 	}
